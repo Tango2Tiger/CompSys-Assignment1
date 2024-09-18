@@ -20,10 +20,12 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
 }
 
 
-void grayscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH]){
+void grayscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
   for (int x = 0; x < BMP_WIDTH; x++) {
     for (int y = 0; y < BMP_HEIGTH; y++) {
-      gray_image[x][y] = (input_image[x][y][0]+input_image[x][y][1]+input_image[x][y][2])/3;
+      for (int c = 0; c < BMP_CHANNELS; c++) {
+        output_image[x][y][c] = (input_image[x][y][0]+input_image[x][y][1]+input_image[x][y][2])/3;
+      }
     }
   }
 }
@@ -62,7 +64,9 @@ int main(int argc, char** argv) {
   read_bitmap(argv[1], input_image);
 
   // Run inversion
-  invert(input_image, output_image);
+  // invert(input_image, output_image);
+
+  // grayscale(input_image, gray_image);
 
   grayscale(input_image, gray_image);
 
