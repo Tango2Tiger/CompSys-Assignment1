@@ -28,7 +28,17 @@ void grayscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],un
   }
 }
 
-
+void binary_colour(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH],unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]){
+  for (int x = 0; x < BMP_WIDTH; x++) {
+    for (int y = 0; y < BMP_HEIGTH; y++) {
+      if (input_image[x][y] > 90){
+        binary_image[x][y] = 1;
+      } else {
+        binary_image[x][y] = 0;
+      }
+    }
+  }
+}
 
 
 
@@ -36,6 +46,7 @@ void grayscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],un
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH];
+unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH];
 
 // Main function
 int main(int argc, char** argv) {
@@ -55,8 +66,10 @@ int main(int argc, char** argv) {
 
   grayscale(input_image, gray_image);
 
+  binary_colour(gray_image, binary_image);
+
   // Save image to file
-  write_bitmap(gray_image, argv[2]);
+  write_bitmap(binary_image, argv[2]);
 
 
 
