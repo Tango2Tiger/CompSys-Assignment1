@@ -20,11 +20,22 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
 }
 
 
+void grayscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH]){
+  for (int x = 0; x < BMP_WIDTH; x++) {
+    for (int y = 0; y < BMP_HEIGTH; y++) {
+      gray_image[x][y] = (input_image[x][y][0]+input_image[x][y][1]+input_image[x][y][2])/3;
+    }
+  }
+}
+
+
+
 
 
 // Declaring the array to store the image (unsigned char = unsigned 8 bit)
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH];
 
 // Main function
 int main(int argc, char** argv) {
@@ -42,11 +53,13 @@ int main(int argc, char** argv) {
   // Run inversion
   invert(input_image, output_image);
 
+  grayscale(input_image, gray_image);
+
   // Save image to file
-  write_bitmap(output_image, argv[2]);
+  write_bitmap(gray_image, argv[2]);
 
 
-  
+
   printf("Done!\n");
   return 0;
 }
