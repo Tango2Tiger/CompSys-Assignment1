@@ -30,13 +30,18 @@ void grayscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],un
   }
 }
 
-void binary_colour(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH],unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]){
+void binary_colour(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
   for (int x = 0; x < BMP_WIDTH; x++) {
     for (int y = 0; y < BMP_HEIGTH; y++) {
-      if (input_image[x][y] > 90){
-        binary_image[x][y] = 1;
+      if (input_image[x][y][0] > 90){
+        for(int i=0; i< BMP_CHANNELS; i++){
+          binary_image[x][y][i] = 255;
+        }
       } else {
-        binary_image[x][y] = 0;
+        for(int j=0; j< BMP_CHANNELS; j++){
+          binary_image[x][y][j] = 0;
+        }
+        
       }
     }
   }
@@ -47,8 +52,8 @@ void binary_colour(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH],unsigned cha
 // Declaring the array to store the image (unsigned char = unsigned 8 bit)
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
-unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH];
-unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH];
+unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 
 // Main function
 int main(int argc, char** argv) {
