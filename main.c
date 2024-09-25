@@ -47,6 +47,45 @@ void binary_colour(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
   }
 }
 
+int check_pixel(int cor1, int cor2, unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS]){
+  if(new_image[cor1-1][cor2][0] == 0 || new_image[cor1+1][cor2][0] == 0 || new_image[cor1][cor2-1][0] == 0 || new_image[cor1][cor2+1][0] == 0){
+    return 0;
+  } else{return 255;}
+}
+
+void add_layer(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS]){
+  for(int i=0; i<BMP_WIDTH+2; i++){
+    for(int j=0; j<BMP_HEIGTH+2; j++){
+      for(int k=0; k< BMP_CHANNELS; k++){
+          new_image[i][j][k] = 255;
+        }
+    }
+  }
+  for(int i=1; i<BMP_WIDTH+1; i++){
+    for(int j=1; j<BMP_HEIGTH+1; j++){
+      for(int k=0; k< BMP_CHANNELS; k++){
+        new_image[i][j][k] = binary_image[i][j][k];
+      }
+    }
+  }
+}
+
+void erode(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS]){
+  add_layer(binary_image, new_image);
+
+  for(int i=1; i<BMP_WIDTH+1; i++){
+    for(int j=1; j<BMP_HEIGTH+1; j++){
+      if(new_image[i][j][0] == 255){
+        for(int k=0; k< BMP_CHANNELS; k++){
+          binary_image[i][j][k] = check_pixel(i, j, new_image);
+        }
+      }
+    }
+  }
+
+
+}
+
 
 
 // Declaring the array to store the image (unsigned char = unsigned 8 bit)
@@ -54,6 +93,7 @@ unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS];
 
 // Main function
 int main(int argc, char** argv) {
@@ -76,6 +116,11 @@ int main(int argc, char** argv) {
   grayscale(input_image, gray_image);
 
   binary_colour(gray_image, binary_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
+  
 
   // Save image to file
   write_bitmap(binary_image, argv[2]);
