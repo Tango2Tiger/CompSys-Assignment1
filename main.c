@@ -82,9 +82,11 @@ void erode(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
       }
     }
   }
-
-
 }
+
+// void 
+
+
 
 
 
@@ -94,6 +96,8 @@ unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS];
+
+unsigned char cell_coords[5000][2];
 
 // Main function
 int main(int argc, char** argv) {
@@ -120,6 +124,8 @@ int main(int argc, char** argv) {
   erode(binary_image,new_image);
   erode(binary_image,new_image);
   erode(binary_image,new_image);
+  erode(binary_image,new_image);
+
   
 
   // Save image to file
