@@ -57,7 +57,7 @@ void add_layer(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], 
   for(int i=0; i<BMP_WIDTH+2; i++){
     for(int j=0; j<BMP_HEIGTH+2; j++){
       for(int k=0; k< BMP_CHANNELS; k++){
-          new_image[i][j][k] = 255;
+          new_image[i][j][k] = 0;
         }
     }
   }
@@ -116,6 +116,13 @@ int main(int argc, char** argv) {
   grayscale(input_image, gray_image);
 
   binary_colour(gray_image, binary_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
   erode(binary_image,new_image);
   erode(binary_image,new_image);
   erode(binary_image,new_image);
