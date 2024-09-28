@@ -20,6 +20,7 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
 }
 
 
+
 void grayscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
   for (int x = 0; x < BMP_WIDTH; x++) {
     for (int y = 0; y < BMP_HEIGTH; y++) {
@@ -57,7 +58,7 @@ void add_layer(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], 
   for(int i=0; i<BMP_WIDTH+2; i++){
     for(int j=0; j<BMP_HEIGTH+2; j++){
       for(int k=0; k< BMP_CHANNELS; k++){
-          new_image[i][j][k] = 255;
+          new_image[i][j][k] = 0;
         }
     }
   }
@@ -82,11 +83,9 @@ void erode(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
       }
     }
   }
+
+
 }
-
-// void 
-
-
 
 
 
@@ -96,8 +95,6 @@ unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS];
-
-unsigned char cell_coords[5000][2];
 
 // Main function
 int main(int argc, char** argv) {
@@ -120,6 +117,9 @@ int main(int argc, char** argv) {
   grayscale(input_image, gray_image);
 
   binary_colour(gray_image, binary_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
+  erode(binary_image,new_image);
   erode(binary_image,new_image);
   erode(binary_image,new_image);
   erode(binary_image,new_image);
