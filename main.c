@@ -9,10 +9,10 @@
 #include "cbmp.h"
 
 
-void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *cell_count);
-void check_square(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *cell_count);
-void check_exclusion(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *cell_count);
-void cell_detected(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *cell_count);
+void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
+void check_square(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
+void check_exclusion(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
+void cell_detected(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
 
 
 
@@ -106,13 +106,10 @@ void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS
 }
 
 void check_square(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count){
-  int x = i;
-  int y = j;
-
-  for(int xi = x; xi<x+11; xi++){
-    for(int yj = y; yj<y+11; yj++){
-      if(new_image[xi][yj][0] == 255){
-        check_exclusion(xi, yj, binary_image, new_image, pCell_count);
+  for(int x = i; x<i+11; x++){
+    for(int y = j; y<j+11; y++){
+      if(new_image[x][y][0] == 255){
+        check_exclusion(x, y, binary_image, new_image, pCell_count);
         return;
       }
     }
@@ -145,14 +142,10 @@ void check_exclusion(int x, int y, unsigned char binary_image[BMP_WIDTH][BMP_HEI
 void cell_detected(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *cell_count) {
   *cell_count += 1;
   
-  // Color the detected cell area in new_image to mark it as processed
-  int x = i;
-  int y = j;
-  
-  for (int xi = x; xi < x + 11; xi++) {
-    for (int yj = y; yj < y + 11; yj++) {
+  for (int x = i; x < i + 11; x++) {
+    for (int y = j; y < j + 11; y++) {
       for (int k = 0; k < BMP_CHANNELS; k++) {
-        new_image[xi][yj][k] = 0;  // Mark this area as processed (set pixels to 0)
+        new_image[x][y][k] = 0;
       }
     }
   }
