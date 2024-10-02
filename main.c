@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "cbmp.h"
 #include <time.h>
+#include <unistd.h>
 
 
 void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
@@ -90,7 +91,7 @@ void erode(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
     for(int j=1; j<BMP_HEIGTH+1; j++){
       if(new_image[i][j][0] == 255){
         for(int k=0; k< BMP_CHANNELS; k++){
-          binary_image[i-1][j-1][k] = check_pixel(i, j, new_image);
+          new_image[i][j][k] = check_pixel(i, j, new_image);
         }
       }
     }
@@ -121,19 +122,19 @@ void check_square(int i, int j, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH]
 void check_exclusion(int x, int y, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count){
   
   for(int i = x-1; i<x+12; i++){
-    if(new_image[i][y-1][0] == 255){return;}
+    if(new_image[i][y-1][0] == 255) return;
   }
 
   for(int i = x-1; i<x+12; i++){
-    if(new_image[i][y+12][0] == 255){return;}
+    if(new_image[i][y+12][0] == 255) return;
   }
 
   for(int j = y-1; j<y+12; j++){
-    if(new_image[x-1][j][0] == 255){return;}
+    if(new_image[x-1][j][0] == 255) return;
   }
 
   for(int j = y-1; j<y+12; j++){
-    if(new_image[x+12][j][0] == 255){return;}
+    if(new_image[x+12][j][0] == 255) return;
   }
   
   cell_detected(x, y, input_image, new_image, pCell_count);
@@ -142,7 +143,7 @@ void check_exclusion(int x, int y, unsigned char input_image[BMP_WIDTH][BMP_HEIG
 
 void cell_detected(int i, int j, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *cell_count) {
   *cell_count += 1;
-  printf("%d, %d\n", i, j);
+  printf("%d, %d \n", i, j);
   
   for (int x = i; x < i + 11; x++) {
     for (int y = j; y < j + 11; y++) {
@@ -166,6 +167,17 @@ void draw_cell(int i, int j, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BM
 }
 
 
+void set_binary(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS]){
+  for(int i=0; i<BMP_WIDTH; i++){
+    for(int j=0; j<BMP_HEIGTH; j++){
+      binary_image[i][j][0] = new_image[i+1][j+1][0];
+      binary_image[i][j][1] = new_image[i+1][j+1][1];
+      binary_image[i][j][2] = new_image[i+1][j+1][2];
+    }
+  }
+}
+
+
 
 // Declaring the array to store the image (unsigned char = unsigned 8 bit)
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
@@ -173,7 +185,6 @@ unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char gray_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS];
-//unsigned char *pNew_image = &new_image;
 int cell_count = 0;
 int *pCell_count = &cell_count;
 
@@ -195,21 +206,22 @@ int main(int argc, char** argv) {
   // Run inversion
   // invert(input_image, output_image);
 
-  // grayscale(input_image, gray_image);
-
   grayscale(input_image, gray_image);
-
   binary_colour(gray_image, binary_image);
 
-  // for(int i=0; i<15; i++){
-  //   erode(binary_image,new_image);
-  //   detect_cells(input_image, new_image, pCell_count);
-  //   //printf("%d \n",cell_count);
-  // }
+  for(int i=0; i<15; i++){
+    erode(binary_image,new_image);
+    //set_binary(binary_image, new_image);
+    detect_cells(input_image, new_image, pCell_count);
+    //set_binary(binary_image, new_image);
+    write_bitmap(binary_image, argv[2]);
+    sleep(1);
+    //printf("%d \n",cell_count);
+  }
   
 
   // Save image to file
-  write_bitmap(binary_image, argv[2]);
+  
 
 
   printf("Done!\n%d cells detected.\n", cell_count);
