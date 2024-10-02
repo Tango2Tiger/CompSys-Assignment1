@@ -11,11 +11,11 @@
 #include <unistd.h>
 
 
-void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
-void check_square(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
-void check_exclusion(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
-void cell_detected(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
-void draw_cell(int i, int j, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]);
+void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
+void check_square(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
+void check_exclusion(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
+void cell_detected(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count);
+void draw_cell(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]);
 void set_binary(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS]);
 
 // Function to invert pixels of an image (negative)
@@ -100,28 +100,27 @@ void erode(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
 }
 
 
-void detect_cells(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count){
+void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count){
   for(int i=1; i<BMP_WIDTH-11; i++){
     for(int j=1; j<BMP_HEIGTH-11; j++){
-      check_square(i, j, input_image, new_image, pCell_count);
+      check_square(i, j, binary_image, input_image, new_image, pCell_count);
     }
   }
 }
 
 
-void check_square(int i, int j, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count){
+void check_square(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count){
   for(int x = i; x<i+11; x++){
     for(int y = j; y<j+11; y++){
       if(new_image[x][y][0] == 255){
-        check_exclusion(x, y, input_image, new_image, pCell_count);
-        return;
+        check_exclusion(x, y, binary_image, input_image, new_image, pCell_count);
       }
     }
   }
 }
 
 
-void check_exclusion(int x, int y, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count){
+void check_exclusion(int x, int y, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *pCell_count){
   
   for(int i = x-1; i<x+12; i++){
     if(new_image[i][y-1][0] == 255) return;
@@ -139,27 +138,30 @@ void check_exclusion(int x, int y, unsigned char input_image[BMP_WIDTH][BMP_HEIG
     if(new_image[x+12][j][0] == 255) return;
   }
   
-  cell_detected(x, y, input_image, new_image, pCell_count);
+  cell_detected(x, y, binary_image, input_image, new_image, pCell_count);
 }
 
 
-void cell_detected(int i, int j, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *cell_count) {
+void cell_detected(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2][BMP_CHANNELS], int *cell_count) {
   *cell_count += 1;
   printf("%d, %d \n", i, j);
   
   for (int x = i; x < i + 11; x++) {
     for (int y = j; y < j + 11; y++) {
+        binary_image[x-1][y-1][0] = 0;
+        binary_image[x-1][y-1][1] = 0;
+        binary_image[x-1][y-1][2] = 0;
         new_image[x][y][0] = 0;
         new_image[x][y][1] = 0;
         new_image[x][y][2] = 0;
     }
   }
 
-  draw_cell(i, j, input_image);
+  draw_cell(i, j, binary_image, input_image);
 }
 
 
-void draw_cell(int i, int j, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
+void draw_cell(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
   for(int x=i+1; x<i+9; x++){
     for(int y=j+1; y<j+9; y++){
       input_image[x-1][y-1][0] = 255;
@@ -214,7 +216,7 @@ int main(int argc, char** argv) {
 
   for(int i=0; i<15; i++){
     erode(binary_image, new_image);
-    detect_cells(input_image, new_image, pCell_count);
+    detect_cells(binary_image, input_image, new_image, pCell_count);
     write_bitmap(input_image, argv[2]);
     //set_binary(binary_image, new_image);
     sleep(1);
