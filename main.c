@@ -48,34 +48,34 @@ void cell_detected(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGT
 
 
 
-void check_exclusion(int x, int y, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2], int *pCell_count){
+void check_exclusion(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2], int *cell_count){
   
-  for(int i = x-1; i<x+9; i++){
-    if(new_image[i][y-1] == 255) return;
+  for(int x = i-1; x<i+10; x++){
+    if(new_image[x][j-1] == 255) return;
   }
 
-  for(int i = x-1; i<x+9; i++){
-    if(new_image[i][y+9] == 255) return;
+  for(int x = i-1; x<i+10; x++){
+    if(new_image[x][j+10] == 255) return;
   }
 
-  for(int j = y-1; j<y+9; j++){
-    if(new_image[x-1][j] == 255) return;
+  for(int y = j-1; y<j+10; y++){
+    if(new_image[i-1][y] == 255) return;
   }
 
-  for(int j = y-1; j<y+9; j++){
-    if(new_image[x+9][j] == 255) return;
+  for(int y = j-1; y<j+10; y++){
+    if(new_image[i+10][y] == 255) return;
   }
   
-  cell_detected(x, y, binary_image, input_image, new_image, pCell_count);
+  cell_detected(i, j, binary_image, input_image, new_image, cell_count);
 }
 
 
 
-void check_square(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2], int *pCell_count){
-  for(int x = i; x<i+8; x++){
-    for(int y = j; y<j+8; y++){
+void check_square(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2], int *cell_count){
+  for(int x = i; x<i+9; x++){
+    for(int y = j; y<j+9; y++){
       if(new_image[x][y] == 255){
-        check_exclusion(i, j, binary_image, input_image, new_image, pCell_count);
+        check_exclusion(i, j, binary_image, input_image, new_image, cell_count);
 
       }
     }
@@ -84,10 +84,10 @@ void check_square(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH
 
 
 
-void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2], int *pCell_count){
-  for(int i=1; i<BMP_WIDTH-11; i++){
-    for(int j=1; j<BMP_HEIGTH-11; j++){
-      check_square(i, j, binary_image, input_image, new_image, pCell_count);
+void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2], int *cell_count){
+  for(int i=1; i<BMP_WIDTH-10; i++){
+    for(int j=1; j<BMP_HEIGTH-10; j++){
+      check_square(i, j, binary_image, input_image, new_image, cell_count);
     }
   }
 }
@@ -173,7 +173,6 @@ unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH];
 unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2];
 int cell_count = 0;
-int *pCell_count = &cell_count;
 
 // Main function
 int main(int argc, char** argv) {
@@ -198,7 +197,7 @@ int main(int argc, char** argv) {
 
   for(int i=0; i<15; i++){
     erode(binary_image, new_image);
-    detect_cells(binary_image, input_image, new_image, pCell_count);
+    detect_cells(binary_image, input_image, new_image, &cell_count);
     write_bitmap(input_image, argv[2]);
     //set_binary(binary_image, new_image);
     sleep(1);
