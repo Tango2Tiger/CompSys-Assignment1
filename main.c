@@ -9,16 +9,64 @@
 #include "cbmp.h"
 #include <time.h>
 #include <unistd.h>
+#include <math.h>
 
+#define MAX_INTENSITY 256
 
-
-void set_binary(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2]){
-  for(int i=0; i<BMP_WIDTH; i++){
-    for(int j=0; j<BMP_HEIGTH; j++){
-      binary_image[i][j] = new_image[i+1][j+1];
+void gethist(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], int histo[MAX_INTENSITY]){
+  for(int k = 0; k < MAX_INTENSITY; k++){
+    for(int i=0; i<BMP_WIDTH; i++){
+      for(int j=0; j<BMP_HEIGTH; j++){
+        if(binary_image[i][j] == k){
+          histo[k]++;
+        }
+      }
     }
   }
 }
+
+
+
+int otsu_threshold(int histogram[MAX_INTENSITY], int total_pixels) {
+    int sumB = 0; 
+    int wB = 0;
+    int wF = 0; 
+    int total_sum = 0;
+    float max_variance = 0.0;
+    int threshold = 0;
+    
+    float sum = 0.0;
+    for (int t = 0; t < MAX_INTENSITY; t++) {
+        sum += t * histogram[t]; 
+    }
+    
+    
+    for (int t = 0; t < MAX_INTENSITY; t++) {
+        wB += histogram[t];  
+        if (wB == 0) continue; 
+        
+        wF = total_pixels - wB; 
+        if (wF == 0) break;
+        
+        sumB += t * histogram[t]; 
+        
+        float mB = (float) sumB / wB; 
+        float mF = (float) (sum - sumB) / wF; 
+        
+        float variance = (float) wB * wF * (mB - mF) * (mB - mF);
+        
+        if (variance > max_variance) {
+          max_variance = variance;
+          threshold = t;
+        }
+    }
+    
+    return threshold;
+}
+
+
+
+int histo[MAX_INTENSITY];
 
 
 void draw_cell(int i, int j, unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
@@ -36,12 +84,10 @@ void cell_detected(int i, int j, unsigned char binary_image[BMP_WIDTH][BMP_HEIGT
   *cell_count += 1;
   printf("%d, %d \n", i, j);
   
-  int x = (i>1) ? i : i;
-  int y = (j>1) ? j : j;
-  for (int xi = x; xi < i + 12; xi++) {
-    for (int yj = y; yj < j + 12; yj++) {
-        binary_image[xi-1][yj-1] = 0;
-        new_image[xi][yj] = 0;
+  for (int x = i; x < i + 12; x++) {
+    for (int y = j; y < j + 12; y++) {
+        binary_image[x-1][y-1] = 0;
+        new_image[x][y] = 0;
     }
   }
 
@@ -95,19 +141,6 @@ void detect_cells(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned ch
 
 
 
-// Function to invert pixels of an image (negative)
-// void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
-//   for (int x = 0; x < BMP_WIDTH; x++) {
-//     for (int y = 0; y < BMP_HEIGTH; y++) {
-//       for (int c = 0; c < BMP_CHANNELS; c++) {
-//         output_image[x][y][c] = 255 - input_image[x][y][c];
-//       }
-//     }
-//   }
-// }
-
-
-
 void grayscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]){
   for (int x = 0; x < BMP_WIDTH; x++) {
     for (int y = 0; y < BMP_HEIGTH; y++) {
@@ -118,10 +151,10 @@ void grayscale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],un
 
 
 
-void binary_colour(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH]){
+void binary_colour(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], int optimal_threshold){
   for (int x = 0; x < BMP_WIDTH; x++) {
     for (int y = 0; y < BMP_HEIGTH; y++) {
-      if (binary_image[x][y] > 90){
+      if (binary_image[x][y] > optimal_threshold){
           binary_image[x][y] = 255;
       } else {
           binary_image[x][y] = 0;
@@ -169,46 +202,45 @@ void erode(unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH], unsigned char new_
 
 
 
-// Declaring the array to store the image (unsigned char = unsigned 8 bit)
 unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char binary_image[BMP_WIDTH][BMP_HEIGTH];
 unsigned char new_image[BMP_WIDTH+2][BMP_HEIGTH+2];
 int cell_count = 0;
 
-// Main function
+
 int main(int argc, char** argv) {
-  // Checking that 2 arguments are passed
   if (argc != 3) {
     fprintf(stderr, "Usage: %s <input file path> <output file path>\n", argv[0]);
     exit(1);
   }
 
-  clock_t t1 = clock();
+  clock_t c1 = clock();
 
   printf("Example program - 02132 - A1\n");
 
-  // Load image from file
   read_bitmap(argv[1], input_image);
 
-  // Run inversion
-  // invert(input_image, output_image);
-
   grayscale(input_image, binary_image);
-  binary_colour(binary_image);
+  int total_pixels = BMP_HEIGTH*BMP_WIDTH;
+
+  gethist(binary_image,histo);
+  int optimal_threshold = otsu_threshold(histo, total_pixels);
+
+  printf("%d ",optimal_threshold);
+  binary_colour(binary_image, optimal_threshold);
 
   for(int i=0; i<30; i++){
     erode(binary_image, new_image);
     detect_cells(binary_image, input_image, new_image, &cell_count);
-    write_bitmap(input_image, argv[2]);
-    //set_binary(binary_image, new_image);
+    
     // sleep(1);
   }
-  
+  write_bitmap(input_image, argv[2]);
 
   printf("Done!\n%d cells detected.\n", cell_count);
 
-  clock_t t2 = clock();
-  double time = ((double) (t2-t1))/CLOCKS_PER_SEC;
+  clock_t c2 = clock();
+  double time = ((double) (c2-c1))/CLOCKS_PER_SEC;
   printf("%lf ", time);
 
   return 0;
